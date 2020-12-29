@@ -12,9 +12,17 @@ API Client -> API Gateway -> Lambda -> DynamoDB
 
 ## Deployment
 
-(Serverless)[https://www.serverless.com/framework/docs/providers/aws/guide/installation/]
+[Serverless](https://www.serverless.com/framework/docs/providers/aws/guide/installation/)
 
 ```bash
 npm install -g serverless
 serverless deploy
+```
+
+## Cleanup
+
+To remove all the AWS resources for the application.
+
+```bash
+serverless remove
 ```
