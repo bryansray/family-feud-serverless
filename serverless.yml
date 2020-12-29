@@ -1,0 +1,101 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: family-feud
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  # you can overwrite defaults here
+  # stage: dev
+  region: us-west-2
+  memorySize: 128
+  apiGateway:
+    shouldStartNameWithService: true
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+functions:
+  createPoll:
+    handler: polls/handlers/create.handler
+    description: Create a Poll.
+    events:
+      - http:
+          method: POST
+          path: v1/polls
+  indexPolls:
+    handler: polls/handlers/index.handler
+    description: Retreieve a list of all the polls.
+    events:
+      - http:
+          method: GET
+          path: v1/polls
+  getPoll:
+    handler: polls/handlers/get.handler
+    description: Retrieve the specified poll.
+    events:
+      - http:
+          method: GET
+          path: v1/polls/{pollId}
+  indexPollResponses:
+    handler: polls/responses/handlers/index.handler
+    description: Retrieve the responses for the specified poll.
+    events:
+      - http:
+          method: GET
+          path: v1/polls/{pollId}/responses
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    PollsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: polls
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+    DynamoDBIamPolicy:
+      Type: AWS::IAM::Policy
+      DependsOn: PollsTable
+      Properties:
+        PolicyName: lambda-dynamodb
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:Scan
+              Resource: arn:aws:dynamodb:*:*:table/polls
+        Roles:
+          - Ref: IamRoleLambdaExecution
